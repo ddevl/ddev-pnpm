@@ -1,6 +1,8 @@
 name: tests
 on:
   pull_request:
+    paths-ignore:
+      - "**.md"
   push:
     branches: [ main ]
 
@@ -15,9 +17,12 @@ on:
         required: false
         default: false
 
-# This is required for "gautamkrishnar/keepalive-workflow"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   tests:
