@@ -5,6 +5,8 @@ on:
       - "**.md"
   push:
     branches: [ main ]
+    paths-ignore:
+      - "**.md"
 
   schedule:
   - cron: '25 08 * * *'
