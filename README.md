@@ -54,4 +54,4 @@ PNPM_DIRECTORY=frontend
 ```
 
 ## Credits
-**Contributed and maintained by @rellafella**
+**Contributed and maintained by [@rellafella](https://github.com/rellafella)**
