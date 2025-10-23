@@ -5,7 +5,7 @@
 
 <div align="center">
     <a href="https://ddev.com/">
-        <img src="https://raw.githubusercontent.com/ddev/ddev/master/images/ddev-logo.svg" alt="DDEV logo" height="80">
+        <img src="https://docs.ddev.com/en/stable/developers/logos/SVG/Logo_w_text.svg" alt="DDEV logo" height="80">
     </a>
     <a href="https://pnpm.io">
         <img src="https://avatars.githubusercontent.com/u/21320719?s=200&v=4" alt="pnpm Logo" height="80">
