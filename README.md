@@ -15,6 +15,8 @@
 
 ## Overview
 
+[pnpm](https://pnpm.io/) is a fast, disk space efficient package manager.
+
 This add-on integrates pnpm into your [DDEV](https://ddev.com/) project.
 
 ## Installation
