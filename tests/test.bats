@@ -98,7 +98,9 @@ teardown() {
   cp -r ${DIR}/tests/testdata/frontend ${TESTDIR}/frontend
 
   # Set the PNPM_DIRECTORY to match our frontend project
-  run echo PNPM_DIRECTORY=frontend > ./.ddev/.env
+  run ddev dotenv set .ddev/.env.web --pnpm-directory=frontend
+  assert_success
+  assert_file_exist .ddev/.env.web
 
   # Restart DDEV to apply the .env settings
   run ddev restart
