@@ -2,10 +2,11 @@
 
 #ddev-generated
 ## Description: Run pnpm in the web container
-## Usage: pnpm
+## Usage: pnpm [flags] [args]
 ## Example: "ddev pnpm"
 ## ExecRaw: true
 ## HostWorkingDir: true
+## MutagenSync: true
 
 # If a $PNPM_DIRECTORY is set, run our PNPM commands in that directory
 if [ -n "$PNPM_DIRECTORY" ]; then

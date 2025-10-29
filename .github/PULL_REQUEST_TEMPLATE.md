@@ -6,14 +6,14 @@
 
 ## How This PR Solves The Issue
 
-<!-- Describe the key change(s) in this PR that addresses the issue above. -->
+<!-- Describe the key change(s) in this PR that address the issue above. -->
 
 ## Manual Testing Instructions
 
 <!-- If this PR changes logic, consider adding additional steps or context to the instructions below. -->
 
 ```bash
-ddev add-on get https://github.com/envsa/ddev-pnpm/tarball/refs/pull/REPLACE_ME_WITH_THIS_PR_NUMBER/head
+ddev add-on get https://github.com/ddev/ddev-pnpm/tarball/refs/pull/REPLACE_ME_WITH_THIS_PR_NUMBER/head
 ddev restart
 ```
 

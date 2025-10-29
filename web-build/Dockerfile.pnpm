@@ -1,2 +1,12 @@
 #ddev-generated
-RUN npm install --global pnpm
+
+RUN npm install --global pnpm && \
+    PNPM_SCRIPT=$(printf '%s\n' \
+        'export PNPM_HOME="$HOME/.local/share/pnpm"' \
+        'case ":$PATH:" in' \
+        '    *":$PNPM_HOME:"*) ;;' \
+        '    *) PATH="$PNPM_HOME:$PATH" ;;' \
+        'esac' \
+        'export PATH') && \
+    echo "$PNPM_SCRIPT" >> /etc/bash.bashrc && \
+    echo "$PNPM_SCRIPT" >> /etc/bash.nointeractive.bashrc

@@ -16,7 +16,7 @@ setup() {
   set -eu -o pipefail
 
   # Override this variable for your add-on:
-  export GITHUB_REPO="envsa/ddev-pnpm"
+  export GITHUB_REPO=ddev/ddev-pnpm
 
   TEST_BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
   export BATS_LIB_PATH="${BATS_LIB_PATH}:${TEST_BREW_PREFIX}/lib:/usr/lib/bats"
@@ -36,27 +36,33 @@ setup() {
   assert_success
   run ddev start -y
   assert_success
+
+  export HAS_PNPM_DIRECTORY=false
 }
 
 health_checks() {
-  # Do something useful here that verifies the add-on
-
-  # You can check for specific information in headers:
-  # run curl -sfI https://${PROJNAME}.ddev.site
-  # assert_output --partial "HTTP/2 200"
-  # assert_output --partial "test_header"
-
-  # Or check if some command gives expected output:
   run ddev pnpm --version
+  assert_success
+
+  if [[ "${HAS_PNPM_DIRECTORY}" == "true" ]]; then
+    run ddev pnpm test
+    assert_success
+    assert_output --partial "directory=frontend"
+  else
+    run ddev pnpm init
+    assert_success
+    assert_file_exist package.json
+  fi
+
+  run ddev pnpm link
   assert_success
 }
 
 teardown() {
-  # set -eu -o pipefail
+  set -eu -o pipefail
   ddev delete -Oy "${PROJNAME}" >/dev/null 2>&1
   # Persist TESTDIR if running inside GitHub Actions. Useful for uploading test result artifacts
   # See example at https://github.com/ddev/github-action-add-on-test#preserving-artifacts
-
   if [ -n "${GITHUB_ENV:-}" ]; then
     [ -e "${GITHUB_ENV:-}" ] && echo "TESTDIR=${HOME}/tmp/${PROJNAME}" >> "${GITHUB_ENV}"
   else
@@ -68,7 +74,7 @@ teardown() {
   set -eu -o pipefail
   echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${DIR}"
-  # assert_success
+  assert_success
   run ddev restart -y
   assert_success
   health_checks
@@ -87,25 +93,18 @@ teardown() {
 
 @test "use ENV to set working directory" {
   set -eu -o pipefail
+  export HAS_PNPM_DIRECTORY=true
+  # Create a frontend project
+  cp -r "${DIR}/tests/testdata/frontend" "${TESTDIR}/frontend"
+  # Set the PNPM_DIRECTORY to match our frontend project
+  run ddev dotenv set .ddev/.env.web --pnpm-directory=frontend
+  assert_success
+  assert_file_exist .ddev/.env.web
+
   echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${DIR}"
   assert_success
   run ddev restart -y
   assert_success
   health_checks
-
-  # Create a frontend project
-  cp -r ${DIR}/tests/testdata/frontend ${TESTDIR}/frontend
-
-  # Set the PNPM_DIRECTORY to match our frontend project
-  run ddev dotenv set .ddev/.env.web --pnpm-directory=frontend
-  assert_success
-  assert_file_exist .ddev/.env.web
-
-  # Restart DDEV to apply the .env settings
-  run ddev restart
-
-  # Confirm it can run the script
-  run ddev pnpm test
-  assert_output --partial "directory=frontend"
 }
