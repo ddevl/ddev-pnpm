@@ -1,6 +1,11 @@
+[![add-on registry](https://img.shields.io/badge/DDEV-Add--on_Registry-blue)](https://addons.ddev.com)
+[![tests](https://github.com/envsa/ddev-pnpm/actions/workflows/tests.yml/badge.svg)](https://github.com/envsa/ddev-pnpm/actions/workflows/tests.yml) 
+[![last commit](https://img.shields.io/github/last-commit/envsa/ddev-pnpm)](https://github.com/envsa/ddev-pnpm/commits)
+[![release](https://img.shields.io/github/v/release/envsa/ddev-pnpm)](https://github.com/envsa/ddev-pnpm/releases/latest)
+
 <div align="center">
     <a href="https://ddev.com/">
-        <img src="https://raw.githubusercontent.com/ddev/ddev/master/images/ddev-logo.svg" alt="DDEV logo" height="80">
+        <img src="https://docs.ddev.com/en/stable/developers/logos/SVG/Logo_w_text.svg" alt="DDEV logo" height="80">
     </a>
     <a href="https://pnpm.io">
         <img src="https://avatars.githubusercontent.com/u/21320719?s=200&v=4" alt="pnpm Logo" height="80">
@@ -8,47 +13,30 @@
     <h1 align="center">ddev-pnpm</h1>
 </div>
 
-[![tests](https://github.com/envsa/ddev-pnpm/actions/workflows/tests.yml/badge.svg)](https://github.com/envsa/ddev-pnpm/actions/workflows/tests.yml) ![project is maintained](https://img.shields.io/maintenance/yes/2024.svg)
+## Overview
 
-## What is pnpm?
+[pnpm](https://pnpm.io/) is a fast, disk space efficient package manager.
 
-> Fast, disk space efficient package manager
-
-For more information, visit [pnpm.io](https://pnpm.io)
+This add-on integrates pnpm into your [DDEV](https://ddev.com/) project.
 
 ## Installation
-
-For DDEV v1.23.5 or above run
-
-```sh
+```bash
 ddev add-on get envsa/ddev-pnpm
-```
-
-For earlier versions of DDEV run
-
-```sh
-ddev get envsa/ddev-pnpm
-```
-
-Then restart your project
-
-```sh
 ddev restart
 ```
 
 ## Usage
-
-```sh
-ddev pnpm
-```
+| Command | Description |
+| ------- | ----------- |
+| `ddev pnpm` | Run pnpm from within the web container |
 
 Please refer to the documentation at [pnpm.io](https://pnpm.io)
 
-### Working directory
+## Advanced Customization
 
 By default, this add-on assumes your `package.json` is in the root of the DDEV project.
 
-In a monorepo, such as the one below, `package.json` is in `frontend`.
+In a monorepo that doesn't have a root level `package.json`, e.g.
 
 ```md
 .
@@ -64,3 +52,6 @@ To configure this addon to run PNPM commands for this example project, set a `PN
 ```env
 PNPM_DIRECTORY=frontend
 ```
+
+## Credits
+**Contributed and maintained by [@rellafella](https://github.com/rellafella)**
