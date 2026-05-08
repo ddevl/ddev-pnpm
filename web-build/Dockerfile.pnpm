@@ -4,8 +4,8 @@ RUN (command -v pnpm >/dev/null 2>&1 || npm install --global pnpm) && \
     PNPM_SCRIPT=$(printf '%s\n' \
         'export PNPM_HOME="/mnt/ddev-global-cache/pnpm"' \
         'case ":$PATH:" in' \
-        '    *":$PNPM_HOME:"*) ;;' \
-        '    *) PATH="$PNPM_HOME:$PATH" ;;' \
+        '    *":$PNPM_HOME/bin:"*) ;;' \
+        '    *) PATH="$PNPM_HOME/bin:$PATH" ;;' \
         'esac' \
         'export PATH') && \
     echo "$PNPM_SCRIPT" >> /etc/bash.bashrc && \
