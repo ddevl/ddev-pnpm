@@ -58,7 +58,7 @@ health_checks() {
     assert_file_exist package.json
   fi
 
-  run ddev pnpm link
+  run ddev pnpm link .
   assert_success
 }
 
@@ -126,7 +126,7 @@ teardown() {
   # Verify is-odd@3.0.1 is stored in the global cache after installing
   run ddev pnpm install
   assert_success
-  run ddev exec bash -c "grep -r 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '3.0.1'"
+  run ddev exec bash -c "grep -R 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '3.0.1'"
   assert_success
 
   # Install the same package version from a second directory and verify it is reused from cache
@@ -141,7 +141,7 @@ teardown() {
   run ddev exec bash -c "cd /var/www/html/third && pnpm install"
   assert_success
 
-  run ddev exec bash -c "grep -r 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '2.0.0'"
+  run ddev exec bash -c "grep -R 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '2.0.0'"
   assert_success
 
   run ddev exec bash -c "node -e \"console.log(require('/var/www/html/third/node_modules/is-odd/package.json').version)\""
