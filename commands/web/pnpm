@@ -14,7 +14,11 @@ fi
 
 # If a $PNPM_DIRECTORY is set, run our PNPM commands in that directory
 if [ -n "$PNPM_DIRECTORY" ]; then
-  pnpm --dir "$PNPM_DIRECTORY" "$@"
-else
-  pnpm "$@"
+  mkdir -p "$DDEV_APPROOT/$PNPM_DIRECTORY"
+  cd "$DDEV_APPROOT/$PNPM_DIRECTORY" || {
+    echo "Error: Failed to change directory to '$DDEV_APPROOT/$PNPM_DIRECTORY'." >&2
+    exit 1
+  }
 fi
+
+pnpm "$@"
