@@ -41,13 +41,6 @@ setup() {
 }
 
 health_checks() {
-  run ddev pnpm --version
-  assert_success
-
-  run ddev pnpm store path
-  assert_success
-  assert_output --partial "/mnt/ddev-global-cache/pnpm"
-
   # Verify $PNPM_HOME is prepended to $PATH. The exact directory depends on the
   # pnpm major version (see web-build/Dockerfile.pnpm): pnpm v11+ uses
   # $PNPM_HOME/bin, older versions use $PNPM_HOME directly.
@@ -65,6 +58,10 @@ health_checks() {
   assert_success
   assert_output --partial ":${expected_path}:"
 
+  run ddev pnpm store path
+  assert_success
+  assert_output --partial "/mnt/ddev-global-cache/pnpm"
+
   if [[ "${HAS_PNPM_DIRECTORY}" == "true" ]]; then
     run ddev pnpm test
     assert_success
@@ -74,6 +71,35 @@ health_checks() {
     assert_success
     assert_file_exist package.json
   fi
+
+  # Verify the global cache is populated after install and reused across directories.
+  # Install is-odd@3.0.1 and verify it is stored in the global cache.
+  mkdir "${TESTDIR}/cache-first"
+  cp "${DIR}/tests/testdata/frontend/package.json" "${TESTDIR}/cache-first/package.json"
+  run ddev exec bash -c "cd /var/www/html/cache-first && pnpm install"
+  assert_success
+  run ddev exec bash -c "grep -R 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '3.0.1'"
+  assert_success
+
+  # Install the same package version from a second directory and verify it is reused from cache
+  mkdir "${TESTDIR}/cache-second"
+  cp "${DIR}/tests/testdata/frontend/package.json" "${TESTDIR}/cache-second/package.json"
+  run ddev exec bash -c "cd /var/www/html/cache-second && pnpm install"
+  assert_success
+  run ddev exec bash -c "cd /var/www/html/cache-second && pnpm list 2>&1 | grep 'is-odd'"
+  assert_success
+  assert_output --partial "3.0.1"
+
+  # Install a different version of the same package and verify the correct version is installed
+  mkdir "${TESTDIR}/cache-third"
+  printf '{"name":"third","version":"1.0.0","dependencies":{"is-odd":"2.0.0"}}' > "${TESTDIR}/cache-third/package.json"
+  run ddev exec bash -c "cd /var/www/html/cache-third && pnpm install"
+  assert_success
+  run ddev exec bash -c "grep -R 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '2.0.0'"
+  assert_success
+  run ddev exec bash -c "cd /var/www/html/cache-third && pnpm list 2>&1 | grep 'is-odd'"
+  assert_success
+  assert_output --partial "2.0.0"
 
   run ddev pnpm link .
   assert_success
