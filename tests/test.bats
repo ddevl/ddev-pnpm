@@ -133,6 +133,10 @@ teardown() {
 @test "v20 Node.js" {
   set -eu -o pipefail
 
+  if [[ "$(ddev --version)" == "ddev version v1.25.2" ]]; then
+    skip "Node.js v20 requires ddev v1.25.3+"
+  fi
+
   ddev config --nodejs-version=20
   assert_success
 
