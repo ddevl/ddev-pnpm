@@ -8,10 +8,6 @@
 ## HostWorkingDir: true
 ## MutagenSync: true
 
-if [ "$(pnpm config get store-dir --global)" == "undefined" ]; then
-  pnpm config set store-dir "$PNPM_HOME" --global
-fi
-
 # If a $PNPM_DIRECTORY is set, run our PNPM commands in that directory
 if [ -n "$PNPM_DIRECTORY" ]; then
   mkdir -p "$DDEV_APPROOT/$PNPM_DIRECTORY"
