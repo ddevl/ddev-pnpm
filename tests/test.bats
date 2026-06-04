@@ -48,6 +48,23 @@ health_checks() {
   assert_success
   assert_output --partial "/mnt/ddev-global-cache/pnpm"
 
+  # Verify $PNPM_HOME is prepended to $PATH. The exact directory depends on the
+  # pnpm major version (see web-build/Dockerfile.pnpm): pnpm v11+ uses
+  # $PNPM_HOME/bin, older versions use $PNPM_HOME directly.
+  run ddev pnpm -v
+  assert_success
+
+  pnpm_version="${output#v}"
+  if [[ "${pnpm_version%%.*}" -ge 11 ]]; then
+    expected_path="/mnt/ddev-global-cache/pnpm/bin"
+  else
+    expected_path="/mnt/ddev-global-cache/pnpm"
+  fi
+
+  run ddev exec 'echo ":$PATH:"'
+  assert_success
+  assert_output --partial ":${expected_path}:"
+
   if [[ "${HAS_PNPM_DIRECTORY}" == "true" ]]; then
     run ddev pnpm test
     assert_success
