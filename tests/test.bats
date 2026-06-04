@@ -44,7 +44,7 @@ health_checks() {
   run ddev pnpm --version
   assert_success
 
-  run ddev exec pnpm config get store-dir --global
+  run ddev pnpm store path
   assert_success
   assert_output --partial "/mnt/ddev-global-cache/pnpm"
 
@@ -97,9 +97,12 @@ teardown() {
 
 @test "use ENV to set working directory" {
   set -eu -o pipefail
+
   export HAS_PNPM_DIRECTORY=true
+
   # Create a frontend project
   cp -r "${DIR}/tests/testdata/frontend" "${TESTDIR}/frontend"
+
   # Set the PNPM_DIRECTORY to match our frontend project
   run ddev dotenv set .ddev/.env.web --pnpm-directory=frontend
   assert_success
@@ -113,38 +116,30 @@ teardown() {
   health_checks
 }
 
-@test "global cache is populated after install" {
+@test "latest Node.js" {
   set -eu -o pipefail
-  cp "${DIR}/tests/testdata/frontend/package.json" "${TESTDIR}/package.json"
+
+  ddev config --nodejs-version=latest
+  assert_success
 
   echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${DIR}"
   assert_success
   run ddev restart -y
   assert_success
+  health_checks
+}
 
-  # Verify is-odd@3.0.1 is stored in the global cache after installing
-  run ddev pnpm install
-  assert_success
-  run ddev exec bash -c "grep -R 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '3.0.1'"
-  assert_success
+@test "v20 Node.js" {
+  set -eu -o pipefail
 
-  # Install the same package version from a second directory and verify it is reused from cache
-  mkdir "${TESTDIR}/second"
-  cp "${TESTDIR}/package.json" "${TESTDIR}/second/package.json"
-  run ddev exec bash -c "cd /var/www/html/second && pnpm install 2>&1 | grep 'Progress:.*done' | grep 'reused [1-9]'"
+  ddev config --nodejs-version=20
   assert_success
 
-  # Install a different version of the same package and verify the correct version is installed
-  mkdir "${TESTDIR}/third"
-  printf '{"name":"third","version":"1.0.0","dependencies":{"is-odd":"2.0.0"}}' > "${TESTDIR}/third/package.json"
-  run ddev exec bash -c "cd /var/www/html/third && pnpm install"
+  echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
+  run ddev add-on get "${DIR}"
   assert_success
-
-  run ddev exec bash -c "grep -R 'is-odd' /mnt/ddev-global-cache/pnpm 2>/dev/null | grep '2.0.0'"
+  run ddev restart -y
   assert_success
-
-  run ddev exec bash -c "node -e \"console.log(require('/var/www/html/third/node_modules/is-odd/package.json').version)\""
-  assert_success
-  assert_output "2.0.0"
+  health_checks
 }

@@ -1,12 +1,49 @@
 #ddev-generated
 
-RUN (command -v pnpm >/dev/null 2>&1 || npm install --global pnpm) && \
-    PNPM_SCRIPT=$(printf '%s\n' \
-        'export PNPM_HOME="/mnt/ddev-global-cache/pnpm"' \
-        'case ":$PATH:" in' \
-        '    *":$PNPM_HOME/bin:"*) ;;' \
-        '    *) PATH="$PNPM_HOME/bin:$PATH" ;;' \
-        'esac' \
-        'export PATH') && \
-    echo "$PNPM_SCRIPT" >> /etc/bash.bashrc && \
-    echo "$PNPM_SCRIPT" >> /etc/bash.nointeractive.bashrc
+RUN <<EOF
+set -eu -o pipefail
+if ! command -v pnpm >/dev/null 2>&1; then
+    NODE_VERSION=$(node -v)
+    IFS=. read -r NODE_MAJOR NODE_MINOR _ <<< "${NODE_VERSION#v}"
+    if [ "$NODE_MAJOR" -gt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -ge 13 ]; }; then
+        PNPM_TAG="latest"
+    elif [ "$NODE_MAJOR" -gt 18 ] || { [ "$NODE_MAJOR" -eq 18 ] && [ "$NODE_MINOR" -ge 12 ]; }; then
+        PNPM_TAG="latest-10"
+    elif [ "$NODE_MAJOR" -gt 16 ] || { [ "$NODE_MAJOR" -eq 16 ] && [ "$NODE_MINOR" -ge 14 ]; }; then
+        PNPM_TAG="latest-8"
+    elif [ "$NODE_MAJOR" -gt 14 ] || { [ "$NODE_MAJOR" -eq 14 ] && [ "$NODE_MINOR" -ge 6 ]; }; then
+        PNPM_TAG="latest-7"
+    elif [ "$NODE_MAJOR" -gt 12 ] || { [ "$NODE_MAJOR" -eq 12 ] && [ "$NODE_MINOR" -ge 17 ]; }; then
+        PNPM_TAG="latest-6"
+    elif [ "$NODE_MAJOR" -gt 10 ] || { [ "$NODE_MAJOR" -eq 10 ] && [ "$NODE_MINOR" -ge 13 ]; }; then
+        PNPM_TAG="latest-5"
+    elif [ "$NODE_MAJOR" -gt 7 ] || { [ "$NODE_MAJOR" -eq 7 ] && [ "$NODE_MINOR" -ge 6 ]; }; then
+        PNPM_TAG="latest-3"
+    elif [ "$NODE_MAJOR" -ge 6 ]; then
+        PNPM_TAG="latest-2"
+    elif [ "$NODE_MAJOR" -ge 4 ]; then
+        PNPM_TAG="latest-1"
+    else
+        PNPM_TAG="latest"
+    fi
+    npm install -g pnpm@"$PNPM_TAG" -f
+fi
+PNPM_VERSION=$(pnpm -v)
+IFS=. read -r PNPM_MAJOR _ <<< "${PNPM_VERSION#v}"
+if [ "$PNPM_MAJOR" -ge 11 ]; then
+    PNPM_BIN=/bin
+else
+    PNPM_BIN=
+fi
+PNPM_SCRIPT=$(printf '%s\n' \
+    'export PNPM_HOME="/mnt/ddev-global-cache/pnpm"' \
+    'export pnpm_config_store_dir="$PNPM_HOME"' \
+    'export npm_config_store_dir="$PNPM_HOME"' \
+    'case ":$PATH:" in' \
+    '    *":$PNPM_HOME'"$PNPM_BIN"':"*) ;;' \
+    '    *) PATH="$PNPM_HOME'"$PNPM_BIN"':$PATH" ;;' \
+    'esac' \
+    'export PATH')
+echo "$PNPM_SCRIPT" >> /etc/bash.bashrc
+echo "$PNPM_SCRIPT" >> /etc/bash.nointeractive.bashrc
+EOF
